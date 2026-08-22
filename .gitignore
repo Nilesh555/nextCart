@@ -1,0 +1,65 @@
+# ================================
+# Python / Django
+# ================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.sqlite3
+db.sqlite3
+
+*.log
+
+# Django
+media/
+staticfiles/
+static_root/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# ================================
+# React / Vite
+# ================================
+
+node_modules/
+dist/
+build/
+
+# Vite
+.vite/
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ================================
+# IDE / Editor
+# ================================
+
+.vscode/
+.idea/
+
+# ================================
+# OS
+# ================================
+
+.DS_Store
+Thumbs.db
+
+# ================================
+# Debug / Temporary
+# ================================
+
+*.tmp
+*.temp
