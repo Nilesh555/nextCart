@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import indiaLocations from "../data/indiaLocations";
 
 function Checkout() {
-  const navigate = useNavigate();
-
   const {
     cartItems,
     subtotal,
@@ -12,6 +11,10 @@ function Checkout() {
     total,
     clearCart,
   } = useCart();
+
+  // =====================================================
+  // FORM DATA
+  // =====================================================
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -24,10 +27,22 @@ function Checkout() {
     pincode: "",
   });
 
+  // =====================================================
+  // STATES
+  // =====================================================
+
   const [placingOrder, setPlacingOrder] =
     useState(false);
 
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  // =====================================================
+  // HANDLE INPUT CHANGE
+  // =====================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,29 +51,131 @@ function Checkout() {
       ...prev,
       [name]: value,
     }));
+
+    setError("");
   };
+
+  // =====================================================
+  // HANDLE STATE CHANGE
+  // =====================================================
+
+  const handleStateChange = (e) => {
+    const selectedState = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+
+      state: selectedState,
+
+      // Reset city when state changes
+      city: "",
+    }));
+
+    setError("");
+  };
+
+  // =====================================================
+  // HANDLE SUBMIT
+  // =====================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setError("");
+
+    // ===================================================
+    // PHONE VALIDATION
+    // ===================================================
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+
+    if (!phoneRegex.test(formData.phone)) {
+      setError(
+        "Please enter a valid 10-digit Indian mobile number."
+      );
+
+      return;
+    }
+
+    // ===================================================
+    // PINCODE VALIDATION
+    // ===================================================
+
+    const pincodeRegex = /^\d{6}$/;
+
+    if (!pincodeRegex.test(formData.pincode)) {
+      setError(
+        "Please enter a valid 6-digit pincode."
+      );
+
+      return;
+    }
+
+    // ===================================================
+    // CHECK STATE
+    // ===================================================
+
+    if (!formData.state) {
+      setError("Please select a state.");
+
+      return;
+    }
+
+    // ===================================================
+    // CHECK CITY
+    // ===================================================
+
+    if (!formData.city) {
+      setError("Please select a city.");
+
+      return;
+    }
+
     try {
       setPlacingOrder(true);
 
-      // Later connect Django Order API here
-      console.log("Order Data:", {
-        customer: formData,
-        items: cartItems,
-        subtotal,
-        shipping,
-        total,
-      });
+      // =================================================
+      // ORDER DATA
+      // =================================================
 
-      // Simulate order placement
+      const orderData = {
+        customer: formData,
+
+        items: cartItems,
+
+        subtotal: subtotal,
+
+        shipping: shipping,
+
+        total: total,
+      };
+
+      console.log(
+        "Order Data:",
+        orderData
+      );
+
+      // =================================================
+      // TEMPORARY ORDER API SIMULATION
+      // =================================================
+      //
+      // Later replace this with your Django Order API.
+      //
+
       await new Promise((resolve) =>
         setTimeout(resolve, 1000)
       );
 
+      // =================================================
+      // CLEAR CART
+      // =================================================
+
       clearCart();
+
+      // =================================================
+      // SHOW SUCCESS
+      // =================================================
+
       setSuccess(true);
 
     } catch (error) {
@@ -66,15 +183,27 @@ function Checkout() {
         "Order placement failed:",
         error
       );
+
+      setError(
+        "Unable to place order. Please try again."
+      );
+
     } finally {
       setPlacingOrder(false);
     }
   };
 
-  // Empty cart
-  if (cartItems.length === 0 && !success) {
+  // =====================================================
+  // EMPTY CART
+  // =====================================================
+
+  if (
+    cartItems.length === 0 &&
+    !success
+  ) {
     return (
       <div className="checkout-page">
+
         <div className="checkout-empty">
 
           <h1>Your Cart is Empty</h1>
@@ -92,11 +221,15 @@ function Checkout() {
           </Link>
 
         </div>
+
       </div>
     );
   }
 
-  // Success
+  // =====================================================
+  // SUCCESS
+  // =====================================================
+
   if (success) {
     return (
       <div className="checkout-page">
@@ -107,11 +240,14 @@ function Checkout() {
             ✓
           </div>
 
-          <h1>Order Placed Successfully!</h1>
+          <h1>
+            Order Placed Successfully!
+          </h1>
 
           <p>
-            Thank you for shopping with NextCart.
-            Your order has been received.
+            Thank you for shopping with
+            NextCart. Your order has been
+            received.
           </p>
 
           <Link
@@ -127,115 +263,199 @@ function Checkout() {
     );
   }
 
+  // =====================================================
+  // IMAGE URL
+  // =====================================================
+
+  const getImageUrl = (image) => {
+    if (!image) {
+      return null;
+    }
+
+    if (image.startsWith("http")) {
+      return image;
+    }
+
+    return `${
+      import.meta.env.VITE_API_URL ||
+      "http://127.0.0.1:8000"
+    }${image}`;
+  };
+
+  // =====================================================
+  // RETURN
+  // =====================================================
+
   return (
     <div className="checkout-page">
 
-      {/* Header */}
+      {/* ================================================= */}
+      {/* HEADER */}
+      {/* ================================================= */}
+
       <section className="checkout-header">
 
         <div>
+
           <span className="section-label">
             CHECKOUT
           </span>
 
-          <h1>Complete Your Order</h1>
+          <h1>
+            Complete Your Order
+          </h1>
 
           <p>
-            Enter your details to place your order.
+            Enter your details to place
+            your order.
           </p>
+
         </div>
 
       </section>
 
-      {/* Checkout */}
+      {/* ================================================= */}
+      {/* CHECKOUT */}
+      {/* ================================================= */}
+
       <section className="checkout-section">
 
         <div className="checkout-container">
 
-          {/* Form */}
+          {/* ================================================= */}
+          {/* FORM */}
+          {/* ================================================= */}
+
           <form
             className="checkout-form"
             onSubmit={handleSubmit}
           >
 
+            {/* ================================================= */}
+            {/* CUSTOMER INFORMATION */}
+            {/* ================================================= */}
+
             <div className="checkout-card">
 
-              <h2>Customer Information</h2>
+              <h2>
+                Customer Information
+              </h2>
+
+              {/* FIRST + LAST NAME */}
 
               <div className="form-row">
 
                 <div className="form-group">
-                  <label>First Name</label>
+
+                  <label>
+                    First Name
+                  </label>
 
                   <input
                     type="text"
                     name="firstName"
-                    value={formData.firstName}
+                    value={
+                      formData.firstName
+                    }
                     onChange={handleChange}
                     placeholder="First name"
                     required
                   />
+
                 </div>
 
                 <div className="form-group">
-                  <label>Last Name</label>
+
+                  <label>
+                    Last Name
+                  </label>
 
                   <input
                     type="text"
                     name="lastName"
-                    value={formData.lastName}
+                    value={
+                      formData.lastName
+                    }
                     onChange={handleChange}
                     placeholder="Last name"
                     required
                   />
+
                 </div>
 
               </div>
 
+              {/* EMAIL + PHONE */}
+
               <div className="form-row">
 
                 <div className="form-group">
-                  <label>Email</label>
+
+                  <label>
+                    Email
+                  </label>
 
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
+                    value={
+                      formData.email
+                    }
                     onChange={handleChange}
                     placeholder="you@example.com"
                     required
                   />
+
                 </div>
 
                 <div className="form-group">
-                  <label>Phone</label>
+
+                  <label>
+                    Phone
+                  </label>
 
                   <input
                     type="tel"
                     name="phone"
-                    value={formData.phone}
+                    value={
+                      formData.phone
+                    }
                     onChange={handleChange}
-                    placeholder="Phone number"
+                    placeholder="10-digit mobile number"
+                    maxLength="10"
+                    inputMode="numeric"
                     required
                   />
+
                 </div>
 
               </div>
 
             </div>
 
-            {/* Address */}
+            {/* ================================================= */}
+            {/* DELIVERY ADDRESS */}
+            {/* ================================================= */}
+
             <div className="checkout-card">
 
-              <h2>Delivery Address</h2>
+              <h2>
+                Delivery Address
+              </h2>
+
+              {/* ADDRESS */}
 
               <div className="form-group">
 
-                <label>Address</label>
+                <label>
+                  Address
+                </label>
 
                 <textarea
                   name="address"
-                  value={formData.address}
+                  value={
+                    formData.address
+                  }
                   onChange={handleChange}
                   placeholder="Enter your complete address"
                   rows="4"
@@ -244,152 +464,285 @@ function Checkout() {
 
               </div>
 
+              {/* CITY + STATE + PINCODE */}
+
               <div className="form-row">
 
-                <div className="form-group">
-                  <label>City</label>
+                {/* CITY */}
 
-                  <input
-                    type="text"
+                <div className="form-group">
+
+                  <label>
+                    City
+                  </label>
+
+                  <select
                     name="city"
-                    value={formData.city}
+                    value={
+                      formData.city
+                    }
                     onChange={handleChange}
-                    placeholder="City"
+                    disabled={
+                      !formData.state
+                    }
                     required
-                  />
+                  >
+
+                    <option value="">
+                      {formData.state
+                        ? "Select City"
+                        : "Select State First"}
+                    </option>
+
+                    {formData.state &&
+                      indiaLocations[
+                        formData.state
+                      ]?.map(
+                        (city) => (
+                          <option
+                            key={city}
+                            value={city}
+                          >
+                            {city}
+                          </option>
+                        )
+                      )}
+
+                  </select>
+
                 </div>
 
-                <div className="form-group">
-                  <label>State</label>
+                {/* STATE */}
 
-                  <input
-                    type="text"
+                <div className="form-group">
+
+                  <label>
+                    State
+                  </label>
+
+                  <select
                     name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    placeholder="State"
+                    value={
+                      formData.state
+                    }
+                    onChange={
+                      handleStateChange
+                    }
                     required
-                  />
+                  >
+
+                    <option value="">
+                      Select State
+                    </option>
+
+                    {Object.keys(
+                      indiaLocations
+                    ).map(
+                      (state) => (
+                        <option
+                          key={state}
+                          value={state}
+                        >
+                          {state}
+                        </option>
+                      )
+                    )}
+
+                  </select>
+
                 </div>
 
+                {/* PINCODE */}
+
                 <div className="form-group">
-                  <label>Pincode</label>
+
+                  <label>
+                    Pincode
+                  </label>
 
                   <input
                     type="text"
                     name="pincode"
-                    value={formData.pincode}
+                    value={
+                      formData.pincode
+                    }
                     onChange={handleChange}
-                    placeholder="Pincode"
+                    placeholder="6-digit pincode"
+                    maxLength="6"
+                    inputMode="numeric"
                     required
                   />
+
                 </div>
 
               </div>
 
             </div>
 
+            {/* ================================================= */}
+            {/* ERROR */}
+            {/* ================================================= */}
+
+            {error && (
+              <div className="checkout-error">
+                {error}
+              </div>
+            )}
+
+            {/* ================================================= */}
+            {/* PLACE ORDER */}
+            {/* ================================================= */}
+
             <button
               type="submit"
               className="place-order-btn"
-              disabled={placingOrder}
+              disabled={
+                placingOrder
+              }
             >
+
               {placingOrder
                 ? "Placing Order..."
-                : `Place Order • ₹${total.toFixed(2)}`}
+                : `Place Order • ₹${total.toFixed(
+                    2
+                  )}`}
+
             </button>
 
           </form>
 
-          {/* Order Summary */}
+          {/* ================================================= */}
+          {/* ORDER SUMMARY */}
+          {/* ================================================= */}
+
           <aside className="checkout-summary">
 
-            <h2>Your Order</h2>
+            <h2>
+              Your Order
+            </h2>
 
             <div className="checkout-products">
 
-              {cartItems.map((item) => {
+              {cartItems.map(
+                (item) => {
 
-                const imageUrl =
-                  item.image?.startsWith("http")
-                    ? item.image
-                    : item.image
-                    ? `${import.meta.env.VITE_API_URL}${item.image}`
-                    : null;
+                  const imageUrl =
+                    getImageUrl(
+                      item.image
+                    );
 
-                return (
-                  <div
-                    className="checkout-product"
-                    key={item.id}
-                  >
+                  return (
+                    <div
+                      className="checkout-product"
+                      key={item.id}
+                    >
 
-                    <div className="checkout-product-image">
+                      {/* PRODUCT IMAGE */}
 
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={item.title}
-                        />
-                      ) : (
-                        <span>🛍️</span>
-                      )}
+                      <div className="checkout-product-image">
 
-                      <span className="checkout-quantity">
-                        {item.quantity}
-                      </span>
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              item.title
+                            }
+                          />
+                        ) : (
+                          <span>
+                            🛍️
+                          </span>
+                        )}
+
+                        <span className="checkout-quantity">
+                          {item.quantity}
+                        </span>
+
+                      </div>
+
+                      {/* PRODUCT INFO */}
+
+                      <div className="checkout-product-info">
+
+                        <h4>
+                          {item.title}
+                        </h4>
+
+                        <span>
+                          ₹
+                          {Number(
+                            item.price
+                          ).toFixed(2)}
+                        </span>
+
+                      </div>
+
+                      {/* ITEM TOTAL */}
+
+                      <strong>
+                        ₹
+                        {(
+                          Number(
+                            item.price
+                          ) *
+                          Number(
+                            item.quantity
+                          )
+                        ).toFixed(2)}
+                      </strong>
 
                     </div>
-
-                    <div className="checkout-product-info">
-
-                      <h4>
-                        {item.title}
-                      </h4>
-
-                      <span>
-                        ₹{Number(item.price).toFixed(2)}
-                      </span>
-
-                    </div>
-
-                    <strong>
-                      ₹
-                      {(
-                        Number(item.price) *
-                        item.quantity
-                      ).toFixed(2)}
-                    </strong>
-
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
 
             </div>
+
+            {/* ================================================= */}
+            {/* SUMMARY */}
+            {/* ================================================= */}
 
             <div className="summary-divider"></div>
 
             <div className="summary-row">
-              <span>Subtotal</span>
+
+              <span>
+                Subtotal
+              </span>
+
               <strong>
-                ₹{subtotal.toFixed(2)}
+                ₹
+                {subtotal.toFixed(2)}
               </strong>
+
             </div>
 
             <div className="summary-row">
-              <span>Shipping</span>
+
+              <span>
+                Shipping
+              </span>
+
               <strong>
-                ₹{shipping.toFixed(2)}
+                ₹
+                {shipping.toFixed(2)}
               </strong>
+
             </div>
 
             <div className="summary-divider"></div>
 
             <div className="summary-total">
-              <span>Total</span>
+
+              <span>
+                Total
+              </span>
 
               <strong>
-                ₹{total.toFixed(2)}
+                ₹
+                {total.toFixed(2)}
               </strong>
+
             </div>
 
           </aside>

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import (
@@ -18,7 +19,18 @@ class RegisterAPIView(APIView):
         serializer = RegisterSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+            
+            user_email = user.email
+            
+            send_mail(
+                "welcome to NextCart Shop",
+                "Your Register Process is Succesfully completed",
+                "chudasamanilesh555@gmail.com",
+                [user_email],
+                fail_silently=False,
+                )
+            
 
             return Response(
                 {
@@ -26,6 +38,8 @@ class RegisterAPIView(APIView):
                 },
                 status=status.HTTP_201_CREATED,
             )
+            
+       
 
         return Response(
             serializer.errors,

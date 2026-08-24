@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
+  const navigate = useNavigate();
+
   const {
     cartItems,
     increaseQuantity,
@@ -10,327 +12,236 @@ function Cart() {
     subtotal,
     shipping,
     total,
+    totalItems,
   } = useCart();
 
-  // =====================================================
-  // EMPTY CART
-  // =====================================================
+  // ==========================================
+  // IMAGE URL
+  // ==========================================
 
-  if (!cartItems || cartItems.length === 0) {
+  const getImageUrl = (image) => {
+    if (!image) return "";
+
+    if (image.startsWith("http")) {
+      return image;
+    }
+
+    return `http://127.0.0.1:8000${image}`;
+  };
+
+  // ==========================================
+  // EMPTY CART
+  // ==========================================
+
+  if (cartItems.length === 0) {
     return (
       <div className="cart-page">
-
-        <div className="cart-empty">
-
-          <div className="cart-empty-icon">
-            🛒
-          </div>
-
+        <div className="empty-cart">
           <h1>Your Cart is Empty</h1>
 
           <p>
-            Looks like you haven't added anything to
-            your cart yet.
+            Add some products to your cart.
           </p>
 
-          <Link
-            to="/products"
-            className="primary-btn"
+          <button
+            onClick={() => navigate("/products")}
           >
-            Start Shopping
-          </Link>
-
+            Continue Shopping
+          </button>
         </div>
-
       </div>
     );
   }
 
-  // =====================================================
-  // CART PAGE
-  // =====================================================
-
   return (
     <div className="cart-page">
 
-      {/* ================================================= */}
-      {/* HEADER */}
-      {/* ================================================= */}
+      {/* ========================================== */}
+      {/* CART HEADER */}
+      {/* ========================================== */}
 
-      <section className="cart-header">
+      <div className="cart-header">
+        <h1>Shopping Cart</h1>
 
-        <div>
+        <p>
+          {totalItems} item
+          {totalItems !== 1 ? "s" : ""} in your cart
+        </p>
+      </div>
 
-          <span className="section-label">
-            YOUR SHOPPING CART
-          </span>
+      <div className="cart-container">
 
-          <h1>Shopping Cart</h1>
+        {/* ========================================== */}
+        {/* CART ITEMS */}
+        {/* ========================================== */}
 
-          <p>
-            Review your products before checkout.
-          </p>
+        <div className="cart-items">
 
-        </div>
+          {cartItems.map((item) => {
+            const itemPrice = Number(
+              item.price || 0
+            );
 
-      </section>
+            const itemQuantity = Number(
+              item.quantity || 1
+            );
 
-      {/* ================================================= */}
-      {/* CART CONTENT */}
-      {/* ================================================= */}
+            const itemStock = Number(
+              item.stock || 0
+            );
 
-      <section className="cart-section">
+            const itemTotal =
+              itemPrice * itemQuantity;
 
-        <div className="cart-container">
+            return (
+              <div
+                className="cart-item"
+                key={item.id}
+              >
 
-          {/* ================================================= */}
-          {/* CART ITEMS */}
-          {/* ================================================= */}
+                {/* PRODUCT IMAGE */}
 
-          <div className="cart-items">
+                <div className="cart-item-image">
+                  {item.image ? (
+                    <img
+                      src={getImageUrl(item.image)}
+                      alt={item.title}
+                    />
+                  ) : (
+                    <div className="no-image">
+                      No Image
+                    </div>
+                  )}
+                </div>
 
-            {cartItems.map((item) => {
+                {/* PRODUCT DETAILS */}
 
-              // Product data comes directly from item
-              const productId = item.id;
+                <div className="cart-item-details">
 
-              const title =
-                item.title ||
-                item.name ||
-                "Product";
+                  <h3>{item.title}</h3>
 
-              const price =
-                Number(item.price || 0);
+                  <p className="cart-item-price">
+                    ₹{itemPrice.toFixed(2)}
+                  </p>
 
-              const stock =
-                Number(item.stock || 0);
-
-              const quantity =
-                Number(item.quantity || 1);
-
-              // =================================================
-              // IMAGE URL
-              // =================================================
-
-              const imageUrl = item.image
-                ? item.image.startsWith("http")
-                  ? item.image
-                  : `http://127.0.0.1:8000${item.image}`
-                : null;
-
-              return (
-                <div
-                  className="cart-item"
-                  key={item.id}
-                >
-
-                  {/* ================================================= */}
-                  {/* PRODUCT IMAGE */}
-                  {/* ================================================= */}
-
-                  <Link
-                    to={`/products/${productId}`}
-                    className="cart-item-image"
-                  >
-
-                    {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={title}
-                      />
-                    ) : (
-                      <div className="cart-no-image">
-                        No Image
-                      </div>
-                    )}
-
-                  </Link>
-
-
-                  {/* ================================================= */}
-                  {/* PRODUCT INFORMATION */}
-                  {/* ================================================= */}
-
-                  <div className="cart-item-info">
-
-                    <span className="cart-item-category">
-                      {item.category?.name ||
-                        item.category ||
-                        "Product"}
-                    </span>
-
-                    <Link
-                      to={`/products/${productId}`}
-                      className="cart-item-title"
-                    >
-                      {title}
-                    </Link>
-
-                    <p className="cart-item-price">
-                      ₹{price.toFixed(2)}
-                    </p>
-
-                  </div>
-
-
-                  {/* ================================================= */}
                   {/* QUANTITY */}
-                  {/* ================================================= */}
 
                   <div className="cart-quantity">
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        decreaseQuantity(item.id)
-                      }
-                      disabled={quantity <= 1}
-                    >
-                      −
-                    </button>
+                    <span>Quantity:</span>
 
-                    <span>
-                      {quantity}
-                    </span>
+                    <div className="cart-quantity-controls">
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        increaseQuantity(item.id)
-                      }
-                      disabled={
-                        stock > 0 &&
-                        quantity >= stock
-                      }
-                    >
-                      +
-                    </button>
+                      <button
+                        onClick={() =>
+                          decreaseQuantity(item.id)
+                        }
+                        disabled={
+                          itemQuantity <= 1
+                        }
+                      >
+                        −
+                      </button>
 
+                      <span>
+                        {itemQuantity}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          increaseQuantity(item.id)
+                        }
+                        disabled={
+                          itemStock > 0 &&
+                          itemQuantity >= itemStock
+                        }
+                      >
+                        +
+                      </button>
+
+                    </div>
                   </div>
 
+                </div>
 
-                  {/* ================================================= */}
-                  {/* ITEM TOTAL */}
-                  {/* ================================================= */}
+                {/* ITEM TOTAL */}
 
-                  <div className="cart-item-total">
+                <div className="cart-item-total">
 
-                    ₹
-                    {(
-                      price * quantity
-                    ).toFixed(2)}
-
-                  </div>
-
-
-                  {/* ================================================= */}
-                  {/* REMOVE */}
-                  {/* ================================================= */}
+                  <p>
+                    ₹{itemTotal.toFixed(2)}
+                  </p>
 
                   <button
-                    type="button"
-                    className="cart-remove-btn"
+                    className="remove-button"
                     onClick={() =>
                       removeFromCart(item.id)
                     }
-                    title="Remove item"
                   >
-                    ×
+                    Remove
                   </button>
 
                 </div>
-              );
-            })}
 
-
-            {/* ================================================= */}
-            {/* CONTINUE SHOPPING */}
-            {/* ================================================= */}
-
-            <Link
-              to="/products"
-              className="continue-shopping"
-            >
-              ← Continue Shopping
-            </Link>
-
-          </div>
-
-
-          {/* ================================================= */}
-          {/* ORDER SUMMARY */}
-          {/* ================================================= */}
-
-          <aside className="cart-summary">
-
-            <h2>Order Summary</h2>
-
-
-            {/* SUBTOTAL */}
-
-            <div className="summary-row">
-
-              <span>
-                Subtotal
-              </span>
-
-              <strong>
-                ₹{Number(subtotal || 0).toFixed(2)}
-              </strong>
-
-            </div>
-
-
-            {/* SHIPPING */}
-
-            <div className="summary-row">
-
-              <span>
-                Shipping
-              </span>
-
-              <strong>
-                ₹{Number(shipping || 0).toFixed(2)}
-              </strong>
-
-            </div>
-
-
-            {/* DIVIDER */}
-
-            <div className="summary-divider"></div>
-
-
-            {/* TOTAL */}
-
-            <div className="summary-total">
-
-              <span>
-                Total
-              </span>
-
-              <strong>
-                ₹{Number(total || 0).toFixed(2)}
-              </strong>
-
-            </div>
-
-
-            {/* CHECKOUT */}
-
-            <Link
-              to="/checkout"
-              className="checkout-btn"
-            >
-              Proceed to Checkout
-            </Link>
-
-          </aside>
+              </div>
+            );
+          })}
 
         </div>
 
-      </section>
+        {/* ========================================== */}
+        {/* ORDER SUMMARY */}
+        {/* ========================================== */}
 
+        <div className="cart-summary">
+
+          <h2>Order Summary</h2>
+
+          <div className="summary-row">
+            <span>Subtotal</span>
+
+            <span>
+              ₹{subtotal.toFixed(2)}
+            </span>
+          </div>
+
+          <div className="summary-row">
+            <span>Shipping</span>
+
+            <span>
+              ₹{shipping.toFixed(2)}
+            </span>
+          </div>
+
+          <hr />
+
+          <div className="summary-row total-row">
+            <strong>Total</strong>
+
+            <strong>
+              ₹{total.toFixed(2)}
+            </strong>
+          </div>
+
+          <button
+            className="checkout-button"
+           onClick={ ()=> navigate("/checkout")}
+          >
+            Proceed to Checkout
+          </button>
+
+          <button
+            className="continue-shopping-button"
+            onClick={() =>
+              navigate("/products")
+            }
+          >
+            Continue Shopping
+          </button>
+
+        </div>
+
+      </div>
     </div>
   );
 }

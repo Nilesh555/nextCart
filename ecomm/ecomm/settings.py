@@ -28,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u83b*qsnrzwc9&1%e6!^afggib_l0weyom2-=pq_m4klwg+ss9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['full-stack-web-project-2.onrender.com/']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -112,6 +112,14 @@ DATABASES = {
 DATABASES['default']['OPTIONS'] = {
     'sslmode': 'require',
 }
+  
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'chudasamanilesh555@gmail.com'
+EMAIL_HOST_PASSWORD = 'xuhy opbv rkbk pwij' # Use an App Password, not account password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER 
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
