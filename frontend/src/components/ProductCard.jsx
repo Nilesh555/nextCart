@@ -4,7 +4,7 @@ function ProductCard({ product }) {
   const imageUrl = product.image
     ? product.image.startsWith("http")
       ? product.image
-      : `${import.meta.env.VITE_API_URL}${product.image}`
+      : `https://nextcart-1-s578.onrender.com${product.image}`
     : null;
 
   return (

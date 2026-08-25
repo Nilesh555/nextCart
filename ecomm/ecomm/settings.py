@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-u83b*qsnrzwc9&1%e6!^afggib_l0weyom2-=pq_m4klwg+ss9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["nextcart-1-s578.onrender.com"]
 
 
 # Application definition
@@ -47,9 +47,13 @@ INSTALLED_APPS = [
     'user',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    "cloudinary",
+    "cloudinary_storage",
 
 ]
+
+
 
 
 MIDDLEWARE = [
@@ -93,9 +97,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-#mail sending 
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

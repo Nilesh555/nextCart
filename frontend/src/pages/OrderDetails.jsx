@@ -303,7 +303,8 @@ function OrderDetails() {
                 const imageUrl = image
                   ? image.startsWith("http")
                     ? image
-                    :`https://nextcart-1-s578.onrender.com${image}`
+                    : `https://nextcart-1-s578.onrender.com${image}`
+
                   : null;
 
                 return (
