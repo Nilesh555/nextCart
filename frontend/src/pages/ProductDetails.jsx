@@ -219,7 +219,7 @@ function ProductDetails() {
               src={
                 product.image.startsWith("http")
                   ? product.image
-                  : `http://127.0.0.1:8000${product.image}`
+                  : `https://nextcart-1-s578.onrender.com{product.image}`
               }
               alt={product.title || product.name}
             />
