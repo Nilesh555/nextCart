@@ -303,7 +303,7 @@ function OrderDetails() {
                 const imageUrl = image
                   ? image.startsWith("http")
                     ? image
-                    : `${import.meta.env.VITE_API_URL}${image}`
+                    :`https://nextcart-1-s578.onrender.com${image}`
                   : null;
 
                 return (
