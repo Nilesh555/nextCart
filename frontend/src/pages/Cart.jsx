@@ -26,7 +26,7 @@ function Cart() {
       return image;
     }
 
-    return `http://127.0.0.1:8000${image}`;
+    return `https://nextcart-1-s578.onrender.com${image}`;
   };
 
   // ==========================================
