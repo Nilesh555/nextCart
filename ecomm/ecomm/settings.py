@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-u83b*qsnrzwc9&1%e6!^afggib_l0weyom2-=pq_m4klwg+ss9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["nextcart-2-0kbu.onrender.com"]
+ALLOWED_HOSTS = ["nextcart-3-6tyk.onrender.com"] 
 
 
 # Application definition
